@@ -47,10 +47,13 @@ module.exports = function(grunt) {
     // Create the regexp with the global and the case insensitive modifiers
     var profanitiesRegex = new RegExp(profanityArr.join("|", "gi"));
 
+    // Create the list of matches
+    var profanities = [];
+
     // Iterate over all specified file groups.
     this.files.forEach(function(f) {
-      var src = f.src.filter(function(filepath) {
 
+      f.src.filter(function(filepath) {
         // Warn on and remove invalid source files (if nonull was set).
         if (!grunt.file.exists(filepath)) {
           grunt.log.writeln('Source file "' + filepath + '" not found.');
@@ -59,24 +62,27 @@ module.exports = function(grunt) {
           return true;
         }
       }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(','));
+        // Read and check file source.
+        var word = profanitiesRegex.exec(grunt.file.read(filepath));
+        if (word !== null) {
+          profanities.push({
+            "word": word,
+            "filepath": filepath
+          });
+        }
+      });
 
-      var profanities = profanitiesRegex.exec(src);
+      var profanityCount = profanities.length;
 
-      if(profanities === null)
+      if(profanityCount < 1)
       {
         grunt.log.ok();
       }
       else
       {
-        profanities.forEach(function(profanity){
-          grunt.log.error('The word "' + profanity + '" was found.');
-        });
-
-        var profanityCount = profanities.length;
-
+        for (var i = 0; i < profanityCount; i++) {
+          grunt.log.error('The word "' + profanities[i].word + '" was found in ' + profanities[i].filepath);
+        }
         grunt.fail.warn(profanityCount + " profanit" + (profanityCount > 1 ? "ies were" : "y was") + " found on your file" + (profanityCount > 1 ? "s" : "") + "." );
       }
 
