@@ -24,7 +24,8 @@ module.exports = function(grunt) {
     var profanityArr = [];
 
     options.languages.forEach(function(lang){
-      var langFile = "lib/profanities/" + lang + ".json";
+      // var langFile = "lib/profanities/" + lang + ".json";
+      var langFile = process.env.PWD + "/node_modules/grunt-profanities/lib/profanities/" + lang + ".json";
 
       if(grunt.file.exists(langFile)){
         var profanitiesWords = grunt.file.readJSON(langFile);
